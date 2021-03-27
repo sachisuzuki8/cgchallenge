@@ -59,9 +59,11 @@ public class CgNasaChallenge {
 
     public void readParamFile() throws IOException {
         // Reads test.txt file line by line, expecting all input values
-        // have no leading space, and separated by a space such as:
+        // have no leading space, and first and second lines areseparated by a space 
+        // and the third line is one string without any spaces such as:
         // first line :5 5
         // second line:1 2 N
+        // third line :MLLRMR
         String fileName = "test.txt";
         BufferedReader br = new BufferedReader(new FileReader(fileName));
          
@@ -69,7 +71,7 @@ public class CgNasaChallenge {
             String oneLine = br.readLine();
             if (oneLine != null) {
                 int x = Integer.parseInt(oneLine.substring(0,1));
-                int y = Integer.parerInt(oneLine.substring(2,3));
+                int y = Integer.parseInt(oneLine.substring(2,3));
                 maxSurface.setXY(x,y);
 
                 // Read next line and iterate only when first line has coordinate info
@@ -78,12 +80,13 @@ public class CgNasaChallenge {
                     InitialPosition initialPosition = new InitialPosition();
                     Coordinate coordinate = new Coordinate();
                     x = Integer.parseInt(nextLine.substring(0,1));
-                    y = Integer.parerInt(nextLine.substring(2,3));
-                    initialPosition.setInitialCoordinate(coordinate.setXY(x,y));
+                    y = Integer.parseInt(nextLine.substring(2,3));
+                    coordinate.setXY(x,y);
+                    initialPosition.setInitialCoordinate(coordinate);
                     initialPosition.setInitialDirection(nextLine.substring(4,5));
 
                     String moveInstruction = br.readLine(); //read move instruction line
-                    initialPosition.setMoveInstruction(getMoveInstruction);
+                    initialPosition.setMoveInstruction(moveInstruction);
                     initialPositions.add(initialPosition);
                     nextLine = br.readLine();
                 }
@@ -95,76 +98,87 @@ public class CgNasaChallenge {
 
     public void setDirectionMap(){
         // Store one move per direction in a map
-        Coordinate coordinate = new Coordinate();
-        coordinate.setXY(0,1);
-        oneMovePerDirection.put("N", coordinate);
-        coordinate.setXY(1,0);
-        oneMovePerDirection.put("E", coordinate);
-        coordinate.setXY(0,-1);
-        oneMovePerDirection.put("W", coordinate);
-        coordinate.setXY(-1,0);
-        oneMovePerDirection.put("S", coordinate);
+        Coordinate coordinateN = new Coordinate();
+        coordinateN.setXY(0,1);
+        oneMovePerDirection.put("N", coordinateN);
+        Coordinate coordinateE = new Coordinate();
+        coordinateE.setXY(1,0);
+        oneMovePerDirection.put("E", coordinateE);
+        Coordinate coordinateW = new Coordinate();
+        coordinateW.setXY(-1,0);
+        oneMovePerDirection.put("W", coordinateW);
+        Coordinate coordinateS = new Coordinate();
+        coordinateS.setXY(0,-1);
+        oneMovePerDirection.put("S", coordinateS);
 
         // Store direction where one rotation points
         oneRotation.put("NR", "E"); //one rotation from North to the Right points East
-        oneRotation.put("NL", "S"); //one rotation from North to the Left points South
-        oneRotation.put("ER", "W");
-        oneRotation.put("EL", "N");
-        oneRotation.put("WR", "S");
-        oneRotation.put("WL", "E");
-        oneRotation.put("SR", "N");
-        oneRotation.put("SL", "W");
+        oneRotation.put("NL", "W"); //one rotation from North to the Left points West
+        oneRotation.put("ER", "S"); //one rotation from East to the Right points South
+        oneRotation.put("EL", "N"); //one rotation from East to the Left points North
+        oneRotation.put("SR", "W"); //one rotation from South to the Right points West
+        oneRotation.put("SL", "E"); //one rotation from South to the Left points East
+        oneRotation.put("WR", "N"); //one rotation from West to the Right points North
+        oneRotation.put("WL", "S"); //one rotation from West to the Left points South
     }
 
     public void setCoordinates(){
         // Repeat as many as there are rovers
-        for (int i=0; i<initialPositions.size(); i++){
-           int currentRover = i;
-           InitialPosition initialPosition = initialPositions.get(i);
-           String directionChangedTo = initialPosition.getInitialDirection();
-           int xChangedTo = initialPosition.getInitialCoordinate().getX();
-           int yChangedTo = initialPosition.getInitialCoordinate().getY();
-           //Iterate through the letters in move instruction
-           for (int j=0; j<initialPosition.getMoveInstruction().length(); j++){
-              if ("R".equals(initialPosition.getMoveInstruction().substring(j, j+1))){
-                directionChangedTo = oneRotation.get(directionChangedTo + "R");
-              } else if ("L".equals(initialPosition.getMoveInstruction().substring(j, j+1))) {
-                directionChangedTo = oneRotation.get(directionChangedTo + "L");           
-              } else if ("M".equals(initialPosition.getMoveInstruction().substring(j, j+1))) {
-                xChangedTo = xChangedTo + oneMovePerDirection.get(directionChangedTo).getX();
-                yChangedTo = yChangedTo + oneMovePerDirection.get(directionChangedTo).getY();
-                // Check to see if the rover is outside of the coordinates
-                if (xChangedTo < 0 || xChangedTo > maxSurface.getX() || 
-                    yChangedTo < 0 || yChangedTo > maxSurface.getY()) {
-                    System.out.println("Rover #" + currentRover + "has gone outside of the surface. Exiting.");
-                    break;
+        int currentRover = -1;
+        for (InitialPosition initialPosition: initialPositions){
+        //for (int i=0; i<initialPositions.size(); i++){
+            currentRover++;
+            //InitialPosition initialPosition = initialPositions.get(i);
+            String directionChangedTo = initialPosition.getInitialDirection();
+            int xChangedTo = initialPosition.getInitialCoordinate().getX();
+            int yChangedTo = initialPosition.getInitialCoordinate().getY();
+            //Iterate through the letters in move instruction
+            for (int j=0; j<initialPosition.getMoveInstruction().length(); j++){
+                if ("R".equals(initialPosition.getMoveInstruction().substring(j, j+1))){
+                   directionChangedTo = oneRotation.get(directionChangedTo + "R");
+                } else if ("L".equals(initialPosition.getMoveInstruction().substring(j, j+1))) {
+                    directionChangedTo = oneRotation.get(directionChangedTo + "L");           
+                } else if ("M".equals(initialPosition.getMoveInstruction().substring(j, j+1))) {
+                    xChangedTo = xChangedTo + oneMovePerDirection.get(directionChangedTo).getX();
+                    yChangedTo = yChangedTo + oneMovePerDirection.get(directionChangedTo).getY();
+                    // Check to see if the rover is outside of the coordinates
+                    if (xChangedTo < 0 || xChangedTo > maxSurface.getX() || 
+                        yChangedTo < 0 || yChangedTo > maxSurface.getY()) {
+                        System.out.println("Rover #" + currentRover + " has gone outside of the surface. Exiting.");                        
+                        return;
+                    }
+                    if (checkCollisions(xChangedTo, yChangedTo, currentRover, initialPositions)){
+                        System.out.println("Rover #" + currentRover + " has collied with other rover. Exiting."); 
+                        return;
+                    }
                 }
-                if (checkCollisions(xChangedTo, yChangedTo)){
-                    System.out.println("Rover #" + currentRover + "has collied with other rover. Exiting.");
-                    break;
-                }
-              }
-           }
-           // Display rover's last position
-           System.out.println(String.valueOf(xChangedTo) + " " + 
-                              String.valueOf(yChangedTo) + " " +
-                              directionChangedTo);
+            }
+            // Display rover's last position
+            System.out.println(String.valueOf(xChangedTo) + " " + 
+                               String.valueOf(yChangedTo) + " " +
+                               directionChangedTo);
 
-           //Update the last position of the current rover (so that we can check for the collision)
-           Coordinate finalCoordinate = new Coordinate();
-           finalCoordinate.setXY(xChangedTo, yChangedTo);
-           InitialPosition finalPosition = new InitialPosition();
-           finalPosition.setInitialCoordinate(finalCoordinate);
-           finalPosition.setInitialDirection(directionChangedTo);
-           initialPositions.set(currentRover, finalPosition); 
-                      
+            //Update the last position of the current rover (so that we can check for the collision)
+            Coordinate finalCoordinate = new Coordinate();
+            finalCoordinate.setXY(xChangedTo, yChangedTo);
+            InitialPosition finalPosition = new InitialPosition();
+            finalPosition.setInitialCoordinate(finalCoordinate);
+            finalPosition.setInitialDirection(directionChangedTo);
+            finalPosition.setMoveInstruction("");
+            initialPositions.set(currentRover, finalPosition);           
         }
     }
 
-    public boolean checkCollisions (int x, int y){
+    public boolean checkCollisions (int x, int y, int currentRover, List<InitialPosition> initialPositions){
         boolean collided = false;
-        for (int i=0; i<initialPositions.size(); i++){
-            InitialPosition initialPosition = initialPositions.get(i);
+        int lineNumber = -1;
+        //for (int i=0; i<initialPositions.size(); i++){
+        for (InitialPosition initialPosition: initialPositions){
+            lineNumber++;
+            if (lineNumber == currentRover){
+                continue;
+            }
+            //InitialPosition initialPosition = initialPositions.get(i);
             Coordinate coordinate = initialPosition.getInitialCoordinate();
             if(x == coordinate.getX() && y == coordinate.getY()){
                collided = true;
