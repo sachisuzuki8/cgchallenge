@@ -126,7 +126,6 @@ public class CgNasaChallenge {
         // Repeat as many as there are rovers
         int currentRover = -1;
         for (InitialPosition initialPosition: initialPositions){
-        //for (int i=0; i<initialPositions.size(); i++){
             currentRover++;
             //InitialPosition initialPosition = initialPositions.get(i);
             String directionChangedTo = initialPosition.getInitialDirection();
@@ -172,7 +171,6 @@ public class CgNasaChallenge {
     public boolean checkCollisions (int x, int y, int currentRover, List<InitialPosition> initialPositions){
         boolean collided = false;
         int lineNumber = -1;
-        //for (int i=0; i<initialPositions.size(); i++){
         for (InitialPosition initialPosition: initialPositions){
             lineNumber++;
             if (lineNumber == currentRover){
